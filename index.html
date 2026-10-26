@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>损失比例计算器</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6f4;color:#203b32;font:17px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}main{max-width:620px;margin:7vh auto;padding:32px}small{color:#53796b}h1{font-size:34px;line-height:1.3;margin:12px 0}p{color:#61766e}.card{background:white;border:1px solid #dee8e1;border-radius:24px;padding:28px;margin-top:26px;box-shadow:0 14px 50px #203b3208}label{display:block;margin:16px 0 8px;font-weight:600}input{width:100%;font:inherit;border:1px solid #b9ccc1;border-radius:10px;padding:12px;color:#203b32}button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:12px 18px;background:#22644c;color:white;margin:20px 8px 0 0}.secondary{background:#edf3ef;color:#22644c}.result{border-radius:14px;background:#edf5f0;padding:20px;margin-top:24px}.value{font-size:42px;font-weight:700;line-height:1.4}#error{color:#a13d30;margin-top:14px}footer{font-size:14px;color:#6d8177;margin-top:24px}@media(max-width:500px){main{padding:20px;margin:24px auto}.card{padding:20px}h1{font-size:29px}}
+</style>
+<main>
+<small>我的第一个 GitHub 项目 · 01</small>
+<h1>损失比例计算器</h1>
+<p>输入原金额和剩余金额，轻松算清损失。<br>使用相同币种即可，无需注册。</p>
+<section class="card">
+<form id="calculator" novalidate>
+<label for="original">原金额</label><input id="original" type="number" min="0.01" step="any" inputmode="decimal" placeholder="例如：10000">
+<label for="remaining">剩余金额</label><input id="remaining" type="number" min="0" step="any" inputmode="decimal" placeholder="例如：7500">
+<button type="submit">计算损失</button><button class="secondary" type="button" id="example">试一下示例</button>
+<div id="error" role="alert"></div>
+</form>
+<div id="result" class="result" aria-live="polite" hidden></div>
+</section>
+<footer>计算公式：损失比例＝（原金额－剩余金额）÷原金额×100%。<br>输入的金额只在当前页面计算，不会上传。金额和比例均显示两位小数。</footer>
+</main>
+<script>
+const original=document.getElementById('original'),remaining=document.getElementById('remaining'),result=document.getElementById('result'),error=document.getElementById('error');
+const format=n=>n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+function calculate(){
+ result.hidden=true;error.textContent='';
+ if(original.value.trim()===''||remaining.value.trim()===''){error.textContent='请先填写两个金额。';return;}
+ const a=Number(original.value),b=Number(remaining.value);
+ if(!Number.isFinite(a)||!Number.isFinite(b)||a<=0||b<0){error.textContent='原金额必须大于 0，剩余金额不能为负数。';return;}
+ const delta=a-b,percentage=Math.abs(delta)/a*100;
+ if(!Number.isFinite(delta)||!Number.isFinite(percentage)){error.textContent='金额差距过大，请检查输入。';return;}
+ const gain=delta<0;
+ result.innerHTML='<div>'+ (gain?'增加比例':'损失比例') +'</div><div class="value">'+format(percentage)+'%</div><div>'+(gain?'增加金额':'损失金额')+'：'+format(Math.abs(delta))+'</div><div>计算过程：'+(gain?'（剩余金额－原金额）':'（原金额－剩余金额）')+'÷原金额×100%</div>'+(gain?'<div>剩余金额高于原金额，当前为增加。</div>':'');
+ result.hidden=false;
+}
+document.getElementById('calculator').addEventListener('submit',event=>{event.preventDefault();calculate()});
+document.getElementById('example').addEventListener('click',()=>{original.value=10000;remaining.value=7500;calculate()});
+[original,remaining].forEach(input=>input.addEventListener('input',()=>{result.hidden=true;error.textContent=''}));
+</script>
+</html>
